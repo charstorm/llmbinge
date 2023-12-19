@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LLM-Binge</title>
+  <meta name="description" content="A tool to explore LLM output">
+  <meta name="author" content="Vinay Krishnan">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/vuetify@3.4.7/dist/vuetify.min.css">
+  <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+<style>
+.related a {
+    text-decoration: None;
+    color: #088;
+}
+</style>
+</head>
+<body>
+  <script type="importmap">
+  {
+    "imports": {
+      "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js",
+      "vuetify": "https://cdn.jsdelivr.net/npm/vuetify@3.4.7/dist/vuetify.esm.js",
+      "ollama_client": "./ollama_client.js",
+      "main": "./main.js"
+    }
+  }
+  </script>
+
+  <div id="app"> </div>
+  <script type="text/x-template" id="app-template">
+  <v-app id="vapp">
+    <v-container no-gutters>
+    <h3 class="mb-2"> LLM Binge </h3>
+
+    <v-text-field label="Prompt"
+                  v-model="user_prompt"
+                  @keyup.enter="handle_prompt_enter" />
+
+    <h4> {{prompt_prev}} </h4>
+    {{response}}
+
+    <div v-if="related.length > 0" class="related">
+      <h4 class="mt-2"> Related </h4>
+      <div v-for="rel in related" :key="rel">
+        <a class="related" href="javascript:void(0)" @click="handle_related_click(rel)">
+          {{rel}}
+        </a>
+      </div>
+    </div>
+
+    </v-container>
+  </v-app>
+  </script>
+
+  <script type="module">
+    import { main } from "./main.js"
+    main()
+  </script>
+</body>
+</html>
