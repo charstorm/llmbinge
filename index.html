@@ -13,6 +13,10 @@
     text-decoration: None;
     color: #088;
 }
+
+.btn {
+  text-transform: unset !important;
+}
 </style>
 </head>
 <body>
@@ -38,7 +42,13 @@
                   @keyup.enter="handle_prompt_enter" />
 
     <h4> {{prompt_prev}} </h4>
-    {{response}}
+    <div v-html="response"></div>
+
+    <div v-if="response.length > 0">
+      <v-btn class="btn mt-3 mb-2" plain small @click="handle_explore_more(evt)">
+      Explore Selected Text
+      </v-btn>
+    </div>
 
     <div v-if="related.length > 0" class="related">
       <h4 class="mt-2"> Related </h4>

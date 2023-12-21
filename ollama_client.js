@@ -26,16 +26,25 @@ export async function llm_generate(text, on_success) {
     const response = await post_stream(ollama_url, data)
     const reader = response.body.getReader()
     let done = false
-    while (!done) {
+    while (true) {
         let chunk = await reader.read()
         done = chunk.done
+        if (done) {
+            break
+        }
         if (!chunk.value) {
             continue
         }
         let decoder = new TextDecoder("utf-8")
         let data = decoder.decode(chunk.value)
-        let obj = JSON.parse(data)
-        if (obj.response) {
+        let obj = null
+        try {
+            obj = JSON.parse(data)
+        } catch(e) {
+            console.log("ERROR: json parse error")
+            continue
+        }
+        if ((obj != null) && (obj.response != null)) {
             chunks.push(obj.response)
         }
     }

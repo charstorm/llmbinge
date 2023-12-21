@@ -24,6 +24,17 @@ function parse_related(related) {
 }
 
 
+function getSelectionText() {
+    var text = "";
+    if (window.getSelection) {
+        text = window.getSelection().toString();
+    } else if (document.selection && document.selection.type != "Control") {
+        text = document.selection.createRange().text;
+    }
+    return text;
+}
+
+
 let appState = {
   template: "#app-template",
   setup() {
@@ -62,8 +73,17 @@ let appState = {
         }
         trigger_next(msg, real)
     }
+    
+    let handle_explore_more = (evt) => {
+        let msg = getSelectionText().trim()
+        if (msg.length == 0) {
+            return
+        }
+        handle_related_click(msg)
+    }
 
     let set_response = (msg) => {
+        msg = msg.replace(/(?:\r\n|\r|\n)/g, '<br>')
         response.value = msg
         prompt_prev.value = last_query
         user_prompt.value = ""
@@ -80,9 +100,11 @@ let appState = {
       related,
       handle_prompt_enter,
       handle_related_click,
+      handle_explore_more,
     }
   }
 }
+
 
 export function main() {
     const vuetify = createVuetify()
