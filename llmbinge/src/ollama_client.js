@@ -90,12 +90,12 @@ export async function get_related(query, response, inc_update) {
 
     Output format required:
     -- output --
-    * topic1
-    * topic2
+    * topic1 (just a name or a phrase)
+    * topic2 (just a name or a phrase)
     * so on
     --
 
-    Only names are required for topics.
+    Only names or phrases are required for topics above.
     `
     // let llm_output = await llm_generate(related_query)
     // let related = parse_related(llm_output)
