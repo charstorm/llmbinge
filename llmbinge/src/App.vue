@@ -20,13 +20,6 @@
             <div v-if="current_node">
               <h4> {{get_title(current_node)}} </h4>
               <div v-html="current_node.description"></div>
-              <div class="linklist mt-2" v-if="current_node.parent_id >= 0">
-                <h4 class="mt-3"> Parent </h4>
-                <a href="javascript:void(0)"
-                   @click="activate_node_id(current_node.parent_id)">
-                   {{get_title_from_node_id(current_node.parent_id)}}
-                </a>
-              </div>
               <template v-if="current_node.related.length > 0">
                 <h4 class="mt-3"> Related </h4>
                 <ul class="linklist">
@@ -34,6 +27,12 @@
                     <a href="javascript:void(0)"
                        @click="handle_related(current_node, rel)">
                       {{rel}}
+                    </a>
+                  </li>
+                  <li class="mt-3">
+                    <a href="javascript:void(0)"
+                       @click="handle_related(current_node, null)">
+                       Explore Selected Text
                     </a>
                   </li>
                 </ul>
@@ -50,6 +49,14 @@
                   </li>
                 </ul>
               </template>
+              <div class="linklist mt-2"
+                v-if="(current_node.parent_id >= 0) && !loading">
+                <h4 class="mt-3"> Parent </h4>
+                <a href="javascript:void(0)"
+                   @click="activate_node_id(current_node.parent_id)">
+                   {{get_title_from_node_id(current_node.parent_id)}}
+                </a>
+              </div>
             </div>
             <div class="mt-4" v-if="loading">
               <v-progress-circular indeterminate color="green" ></v-progress-circular>
@@ -75,7 +82,7 @@ let loading = ref(false)
 let error = ref("")
 
 
-function new_node(parent_id=-1, title="", query="", description="") {
+function new_node(parent_id=-1, title="", query="") {
   let node_id = node_counter
   node_counter++
   let node = {
@@ -83,7 +90,7 @@ function new_node(parent_id=-1, title="", query="", description="") {
     node_id: node_id,
     title: title,
     query: query,
-    description: description,
+    description: "",
     related: [],
     explored: [],
   }
@@ -103,11 +110,6 @@ function get_title(node) {
 }
 
 
-async function set_node_related(node) {
-  node.related = await get_related(node.query, node.description)
-}
-
-
 async function create_node_fill_description(parent_id, title, query) {
   if (loading.value) {
     return
@@ -116,11 +118,24 @@ async function create_node_fill_description(parent_id, title, query) {
   loading.value = true
   let node = null
   try {
-    let response = await llm_generate(query)
-    response = response.trim().replace(/(?:\r\n|\r|\n)/g, '<br>')
-    node = new_node(parent_id, title, query, response)
+    node = new_node(parent_id, title, query)
     current_node.value = node
-    await set_node_related(node)
+    let combined = ""
+    let raw_description = ""
+    let text_count = 0
+    await llm_generate(query, (text) => {
+      raw_description += text
+      text = text.replace(/(?:\r\n|\r|\n)/g, '<br>')
+      text_count++
+      if ((text_count == 1) && (text == "<br>")) {
+        return
+      }
+      combined += text
+      current_node.value.description = combined
+    })
+    await get_related(query, raw_description, (rel) => {
+      current_node.value.related.push(rel)
+    })
   }
   catch (e) {
     console.log(`ERROR: ${e}`)
@@ -129,14 +144,30 @@ async function create_node_fill_description(parent_id, title, query) {
   return node
 }
 
-
 async function handle_user_query(evt) {
   await create_node_fill_description(-1, "", user_query.value)
   user_query.value = ""
 }
 
 
+function getSelectionText() {
+    var text = "";
+    if (window.getSelection) {
+        text = window.getSelection().toString();
+    } else if (document.selection && document.selection.type != "Control") {
+        text = document.selection.createRange().text;
+    }
+    return text;
+}
+
+
 async function handle_related(node, rel) {
+  if (rel === null) {
+    rel = getSelectionText()
+    if (rel.trim().length == 0) {
+      return
+    }
+  }
   let parent_title = get_title(node)
   let query = `In the context of "${parent_title}", explain ${rel}`
   let child = await create_node_fill_description(node.node_id, rel, query)
@@ -165,9 +196,11 @@ function get_title_from_node_id(node_id) {
   return get_title(node_list.value[node_id])
 }
 
+
 function get_num_explored(node) {
    return Object.keys(node.explored).length;
 }
+
 
 function get_explored_as_list(node) {
   let result = []
@@ -179,6 +212,7 @@ function get_explored_as_list(node) {
   }
   return result
 }
+
 
 function handle_explored(obj) {
   current_node.value = obj.child

@@ -13,7 +13,7 @@ function post_stream(url, data) {
     return fetch(url, post_params)
 }
 
-export async function llm_generate(text) {
+export async function llm_generate(text, push_text) {
     const data = {
         prompt: text,
         model: model,
@@ -22,7 +22,6 @@ export async function llm_generate(text) {
             seed: Math.floor(Math.random() * 10000)
         }
     }
-    let chunks = []
     const response = await post_stream(ollama_url, data)
     const reader = response.body.getReader()
     let done = false
@@ -45,10 +44,10 @@ export async function llm_generate(text) {
             continue
         }
         if ((obj != null) && (obj.response != null)) {
-            chunks.push(obj.response)
+            // chunks.push(obj.response)
+            push_text(obj.response)
         }
     }
-    return chunks.join("")
 }
 
 
@@ -69,8 +68,18 @@ function parse_related(related) {
     return result
 }
 
+function get_all_lines(data) {
+    let parts = data.split("\n")
+    let remaining = ""
+    if (data.endsWith("\n")) {
+        parts.pop()
+    } else {
+        remaining = parts.pop()
+    }
+    return [parts, remaining]
+}
 
-export async function get_related(query, response) {
+export async function get_related(query, response, inc_update) {
     const related_query = `
     Based on the following query and response, give a bullet list of
     topics to explore further.
@@ -88,8 +97,37 @@ export async function get_related(query, response) {
 
     Only names are required for topics.
     `
-    let llm_output = await llm_generate(related_query)
-    let related = parse_related(llm_output)
-    return related
+    // let llm_output = await llm_generate(related_query)
+    // let related = parse_related(llm_output)
+    // return related
+    let lines_added = 0
+    let rem = ""
+
+    let send_update = (line) => {
+        if (!line.startsWith("*")) {
+            return
+        }
+        line = line.substr(1).trim()
+        if (line.length > 3) {
+            inc_update(line)
+            lines_added++
+        }
+    }
+
+    await llm_generate(related_query, (text) => {
+        rem += text
+        let [splits, remaining] = get_all_lines(rem)
+        for (let idx = 0; idx < splits.length; idx++) {
+            let part = splits[idx]
+            send_update(part)
+        }
+        rem = remaining
+    })
+    send_update(rem)
+    // Nasty hack
+    // Sometimes we don't get output in the format we want. So try again.
+    if (lines_added == 0) {
+        await get_related(query, response, inc_update)
+    }
 }
 
