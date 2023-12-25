@@ -43,7 +43,7 @@
                   <li v-for="exp in get_explored_as_list(current_node)"
                       :key="exp.title">
                       <a href="javascript:void(0)"
-                         @click="handle_explored(exp)">
+                         @click="activate_node(exp.child)">
                          {{exp.title}}
                       </a>
                   </li>
@@ -134,7 +134,9 @@ async function create_node_fill_description(parent_id, title, query) {
       current_node.value.description = combined
     })
     await get_related(query, raw_description, (rel) => {
-      current_node.value.related.push(rel)
+      if (get_title(current_node.value).toLowerCase() != rel.toLowerCase()) {
+        current_node.value.related.push(rel)
+      }
     })
   }
   catch (e) {
@@ -150,7 +152,7 @@ async function handle_user_query(evt) {
 }
 
 
-function getSelectionText() {
+function get_selection_text() {
     var text = "";
     if (window.getSelection) {
         text = window.getSelection().toString();
@@ -163,7 +165,7 @@ function getSelectionText() {
 
 async function handle_related(node, rel) {
   if (rel === null) {
-    rel = getSelectionText()
+    rel = get_selection_text()
     if (rel.trim().length == 0) {
       return
     }
@@ -177,6 +179,9 @@ async function handle_related(node, rel) {
 
 
 function activate_node(node) {
+  if (loading.value) {
+    return
+  }
   current_node.value = node
 }
 
@@ -211,11 +216,6 @@ function get_explored_as_list(node) {
     result.push({title, child})
   }
   return result
-}
-
-
-function handle_explored(obj) {
-  current_node.value = obj.child
 }
 
 </script>
