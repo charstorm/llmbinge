@@ -14,3 +14,18 @@ Currently [ollama](https://github.com/jmorganca/ollama) is the only supported ba
 3. Generation based on text selection
 4. History management
 5. Parent-child relation management for topics
+
+## Development
+
+Use the following commands to get the app running in dev mode:
+
+```bash
+https://github.com/charstorm/llmbinge.git
+cd llmbinge/llmbinge
+yarn install
+yarn dev
+```
+
+The app uses the following fixed parameters (for now):
+* ollama url = "http://localhost:11434/api/generate"
+* model = mistral
