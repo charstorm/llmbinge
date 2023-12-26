@@ -164,12 +164,12 @@ async function create_node_fill_description(parent_id, title, query) {
       }
       combined += text
       current_node.value.description = combined
-      scroll_into_view("end_of_app")
+      // scroll_into_view("end_of_app")
     })
     await get_related(query, raw_description, (rel) => {
       if (get_title(current_node.value).toLowerCase() != rel.toLowerCase()) {
         current_node.value.related.push(rel)
-        scroll_into_view("end_of_app")
+        // scroll_into_view("end_of_app")
       }
     })
   }
@@ -177,7 +177,7 @@ async function create_node_fill_description(parent_id, title, query) {
     console.log(`ERROR: ${e}`)
   }
   loading.value = false
-  setTimeout(() => { scroll_into_view("end_of_app") }, 20)
+  // setTimeout(() => { scroll_into_view("end_of_app") }, 20)
   return node
 }
 
