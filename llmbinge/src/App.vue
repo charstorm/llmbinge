@@ -39,7 +39,7 @@
                 <div v-if="!loading" class="linklist">
                   <h4 class="mt-3"> Aspects </h4>
                   <div class="d-flex flex-wrap">
-                    <div class="pr-2" v-for="asp in aspects">
+                    <div class="pr-2" v-for="asp in current_node.aspects">
                       <a href="javascript:void(0)"
                          @click="handle_aspect(current_node, asp)">
                         {{asp}}
@@ -98,12 +98,12 @@ let user_query = ref("")
 let busy = false
 let loading = ref(false)
 let error = ref("")
-let aspects = ref(split_remove_minus(`
+let aspects = split_remove_minus(`
 history related-people locations applications risk saftey
 similar-ideas similar-topics related-ideas related-topics
 side-effects materials current-practices process production
 discovery invention cause effect planning construction
-`))
+`)
 
 function new_node(parent_id=-1, title="", query="") {
   let node_id = node_counter
@@ -116,6 +116,7 @@ function new_node(parent_id=-1, title="", query="") {
     description: "",
     related: [],
     explored: [],
+    aspects: aspects,
   }
   node_list.value.push(node)
   return node
@@ -279,6 +280,7 @@ async function handle_aspect(node, aspect) {
     return
   }
   let child = await create_node_fill_description(node.node_id, "", query)
+  node.aspects = node.aspects.filter(item => item !== aspect)
   node.explored.push(child.node_id)
 }
 
