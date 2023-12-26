@@ -63,6 +63,7 @@
             </div>
           </v-col>
         </v-row>
+        <div id="end_of_app" class="mb-2"></div>
       </v-container>
     </v-main>
   </v-app>
@@ -110,6 +111,14 @@ function get_title(node) {
 }
 
 
+function scroll_into_view(elem_id) {
+  let elem = document.getElementById(elem_id)
+  if (elem != null) {
+    elem.scrollIntoView()
+  }
+}
+
+
 async function create_node_fill_description(parent_id, title, query) {
   if (loading.value) {
     return
@@ -132,10 +141,12 @@ async function create_node_fill_description(parent_id, title, query) {
       }
       combined += text
       current_node.value.description = combined
+      scroll_into_view("end_of_app")
     })
     await get_related(query, raw_description, (rel) => {
       if (get_title(current_node.value).toLowerCase() != rel.toLowerCase()) {
         current_node.value.related.push(rel)
+        scroll_into_view("end_of_app")
       }
     })
   }
@@ -143,6 +154,7 @@ async function create_node_fill_description(parent_id, title, query) {
     console.log(`ERROR: ${e}`)
   }
   loading.value = false
+  setTimeout(() => { scroll_into_view("end_of_app") }, 20)
   return node
 }
 
@@ -164,6 +176,9 @@ function get_selection_text() {
 
 
 async function handle_related(node, rel) {
+  if (loading.value) {
+    return
+  }
   if (rel === null) {
     rel = get_selection_text()
     if (rel.trim().length == 0) {
