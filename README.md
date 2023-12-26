@@ -14,6 +14,7 @@ Currently [ollama](https://github.com/jmorganca/ollama) is the only supported ba
 3. Generation based on text selection
 4. History management
 5. Parent-child relation management for topics
+6. Handling a set of aspects for every response (eg: people, places, etc)
 
 ## Development
 

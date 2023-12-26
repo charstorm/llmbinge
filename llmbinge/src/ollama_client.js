@@ -1,6 +1,8 @@
 
+// const model = "llama2"
 const model = "mistral"
 const ollama_url = "http://localhost:11434/api/generate"
+
 
 function post_stream(url, data) {
     let post_params = {
@@ -13,7 +15,8 @@ function post_stream(url, data) {
     return fetch(url, post_params)
 }
 
-export async function llm_generate(text, push_text) {
+
+export async function llm_generate(text, push_text=null) {
     const data = {
         prompt: text,
         model: model,
@@ -24,6 +27,7 @@ export async function llm_generate(text, push_text) {
     }
     const response = await post_stream(ollama_url, data)
     const reader = response.body.getReader()
+    let chunks = []
     let done = false
     while (true) {
         let chunk = await reader.read()
@@ -44,10 +48,13 @@ export async function llm_generate(text, push_text) {
             continue
         }
         if ((obj != null) && (obj.response != null)) {
-            // chunks.push(obj.response)
-            push_text(obj.response)
+            chunks.push(obj.response)
+            if (push_text != null) {
+                push_text(obj.response)
+            }
         }
     }
+    return chunks.join("")
 }
 
 
@@ -68,6 +75,7 @@ function parse_related(related) {
     return result
 }
 
+
 function get_all_lines(data) {
     let parts = data.split("\n")
     let remaining = ""
@@ -79,16 +87,11 @@ function get_all_lines(data) {
     return [parts, remaining]
 }
 
+
 export async function get_related(query, response, inc_update) {
     const related_query = `
     Based on the following query and response, give suggestions for
     topics to explore further.
-
-    Include some of the following aspects, if and only if relevant and useful:
-    history, cost, cause, effect, side-effect, people, locations, timeline,
-    process, equipments, medicines, materials, risk, safety, concerns,
-    ideas, theories, simplicity, complexity, accessibility, products,
-    issues, conflicts, structure, method, etc
 
     Query: ${query}
 
@@ -132,12 +135,42 @@ export async function get_related(query, response, inc_update) {
         rem = remaining
     })
     send_update(rem)
-    console.log(full_text)
     // Nasty hack
     // Sometimes we don't get output in the format we want. So try again.
     if (lines_added == 0) {
         console.log("WARNING: No lines found!")
+        console.log(full_text)
         await get_related(query, response, inc_update)
     }
 }
 
+export async function llm_get_aspect_query(title, aspect) {
+    const prefix = "Query-rephrased:"
+    const aspect_query = `
+    Agressively simplify and rephrase the query given below.
+    Do not ask for further clarification.
+    Do not include extra information other what is in the query.
+
+    Query: In the context of "${title}", elaborate on the aspect "${aspect}"
+
+    Output should be of the following format:
+    --- format ---
+    Query: same as the above one
+    Topic: topic of the query
+    Aspect: what is the aspect of discussion
+    ${prefix} simplified query
+    ---
+    `.trim()
+
+    let response = await llm_generate(aspect_query)
+    let lines = response.split("\n")
+    let result = ""
+    let prefix_lower = prefix.toLowerCase()
+    for (let idx = 0; idx < lines.length; idx++) {
+        let line = lines[idx].trim()
+        if (line.toLowerCase().startsWith(prefix_lower)) {
+            result = line.slice(prefix.length).trim()
+        }
+    }
+    return result
+}

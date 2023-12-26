@@ -29,13 +29,24 @@
                       {{rel}}
                     </a>
                   </li>
-                  <li class="mt-3">
+                  <li v-if="!loading" class="mt-3">
                     <a href="javascript:void(0)"
                        @click="handle_related(current_node, null)">
                        Explore Selected Text
                     </a>
                   </li>
                 </ul>
+                <div v-if="!loading" class="linklist">
+                  <h4 class="mt-3"> Aspects </h4>
+                  <div class="d-flex flex-wrap">
+                    <div class="pr-2" v-for="asp in aspects">
+                      <a href="javascript:void(0)"
+                         @click="handle_aspect(current_node, asp)">
+                        {{asp}}
+                      </a>
+                    </div>
+                  </div>
+                </div>
               </template>
               <template v-if="get_num_explored(current_node) > 0">
                 <h4 class="mt-3"> Explored </h4>
@@ -71,7 +82,13 @@
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
-import { llm_generate, get_related } from "./ollama_client.js"
+import { llm_generate, get_related, llm_get_aspect_query } from "./ollama_client.js"
+
+function split_remove_minus(data) {
+  return data.split(/\s+/)
+             .filter(s => s.trim() != "")
+             .sort()
+}
 
 let node_counter = 0
 let node_list = ref([])
@@ -81,7 +98,12 @@ let user_query = ref("")
 let busy = false
 let loading = ref(false)
 let error = ref("")
-
+let aspects = ref(split_remove_minus(`
+history related-people locations applications risk saftey
+similar-ideas similar-topics related-ideas related-topics
+side-effects materials current-practices process production
+discovery invention cause effect planning construction
+`))
 
 function new_node(parent_id=-1, title="", query="") {
   let node_id = node_counter
@@ -158,6 +180,7 @@ async function create_node_fill_description(parent_id, title, query) {
   return node
 }
 
+
 async function handle_user_query(evt) {
   await create_node_fill_description(-1, "", user_query.value)
   user_query.value = ""
@@ -231,6 +254,32 @@ function get_explored_as_list(node) {
     result.push({title, child})
   }
   return result
+}
+
+
+async function handle_aspect(node, aspect) {
+  if (loading.value) {
+    return
+  }
+  current_node.value = null
+  loading.value = true
+  let query = ""
+  let parent_title = get_title(node)
+  try {
+    query = await llm_get_aspect_query(parent_title, aspect)
+  }
+  catch (e) {
+    console.log(`ERROR: ${e}`)
+    return
+  }
+  finally {
+    loading.value = false
+  }
+  if (query == "") {
+    return
+  }
+  let child = await create_node_fill_description(node.node_id, "", query)
+  node.explored.push(child.node_id)
 }
 
 </script>
