@@ -17,7 +17,6 @@ Currently [ollama](https://github.com/jmorganca/ollama) is the only supported ba
 6. Handling a set of aspects for every response (eg: people, places, etc)
 
 ## Development
-
 Use the following commands to get the app running in dev mode:
 
 ```bash
@@ -30,3 +29,13 @@ yarn dev
 The app uses the following fixed parameters (for now):
 * ollama url = "http://localhost:11434/api/generate"
 * model = mistral
+
+## TODO
+
+- [ ] configuration for model and url
+- [ ] configuration for output size
+- [ ] favicon for the app
+- [ ] support response regeneration
+- [ ] support save and reload
+- [ ] detailed instructions on setting up the project
+- [ ] release 1.0
