@@ -1,9 +1,15 @@
 // This file handles the calls to ollama API
 
 // TODO: This should be configurable
-const model = "mistral"
-const ollama_url = "http://localhost:11434/api/generate"
+let ollama_url = "http://localhost:11434/api/generate"
+let model = "mistral"
 
+
+// set configuration
+export function set_config(cfg_url, cfg_model) {
+    ollama_url = cfg_url
+    model = cfg_model
+}
 
 // Ollama has a streaming API. This helps to get incremental output for the
 // text generation. This function handles the post part.

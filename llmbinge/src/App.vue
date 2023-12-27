@@ -4,6 +4,13 @@
       <v-container>
         <v-row>
           <v-col cols="3">
+
+            <div class="mb-2">
+              <v-btn density="compact" icon="mdi-cog"
+                     @click="config.show = !config.show">
+              </v-btn>
+            </div>
+
             <h3> Generated </h3>
             <ul class="linklist leftbar">
               <li v-for="node in node_list" :key="get_title(node)" class="mt-3">
@@ -14,14 +21,40 @@
               </li>
             </ul>
           </v-col>
+
           <v-col cols="9">
+            <div v-if="config.show" class="mb-2">
+              <h4> Configuration </h4>
+              <div class="mt-2 d-flex flex-wrap">
+                <v-text-field dense
+                              class="mr-4"
+                              style="max-width: 400px;"
+                              type="input"
+                              label="ollama url"
+                              v-model="config.ollama_url" />
+                <v-text-field dense
+                              style="max-width: 200px;"
+                              type="input"
+                              label="model"
+                              v-model="config.model" />
+              </div>
+              <v-btn variant="outlined" class="mb-6" density="compact"
+                     @click="apply_config">
+                Apply
+              </v-btn>
+            </div>
+
             <v-text-field label="Your Query" v-model="user_query"
                           @keyup.enter="handle_user_query" />
+
             <div v-if="current_node">
+
               <h4> {{get_title(current_node)}} </h4>
               <div v-html="current_node.description"></div>
+
               <template v-if="current_node.related.length > 0">
                 <h4 class="mt-3"> Related </h4>
+
                 <ul class="linklist">
                   <li v-for="rel in current_node.related" :key="rel">
                     <a href="javascript:void(0)"
@@ -36,6 +69,7 @@
                     </a>
                   </li>
                 </ul>
+
                 <div v-if="!loading" class="linklist">
                   <h4 class="mt-3"> Aspects </h4>
                   <div class="d-flex flex-wrap">
@@ -48,6 +82,7 @@
                   </div>
                 </div>
               </template>
+
               <template v-if="get_num_explored(current_node) > 0">
                 <h4 class="mt-3"> Explored </h4>
                 <ul class="linklist">
@@ -60,6 +95,7 @@
                   </li>
                 </ul>
               </template>
+
               <div class="linklist mt-2"
                 v-if="(current_node.parent_id >= 0) && !loading">
                 <h4 class="mt-3"> Parent </h4>
@@ -68,6 +104,7 @@
                    {{get_title_from_node_id(current_node.parent_id)}}
                 </a>
               </div>
+
             </div>
             <div class="mt-4" v-if="loading">
               <v-progress-circular indeterminate color="green" ></v-progress-circular>
@@ -82,7 +119,9 @@
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
-import { llm_generate, get_related, llm_get_aspect_query } from "./ollama_client.js"
+import { 
+  llm_generate, get_related, llm_get_aspect_query, set_config
+} from "./ollama_client.js"
 
 function split_remove_minus(data) {
   return data.split(/\s+/)
@@ -109,6 +148,13 @@ side-effects materials current-practices process production
 discovery invention cause effect planning construction
 natural artificial
 `)
+
+let config = ref({
+  show: false,
+  ollama_url: "http://localhost:11434/api/generate",
+  model: "mistral"
+})
+
 
 // Create a new empty node
 // parent_id: the id of the parent node
@@ -272,7 +318,7 @@ function get_explored_as_list(node) {
 }
 
 // Handle the clicking of a given aspect
-// 
+//
 // This is a two step process.
 // 1. Generate a new query based on the title of the current node and the aspect
 // 2. Generate a new node based on the query generated in 1
@@ -302,6 +348,12 @@ async function handle_aspect(node, aspect) {
   let child = await create_node_fill_description(node.node_id, "", query)
   node.aspects = node.aspects.filter(item => item !== aspect)
   node.explored.push(child.node_id)
+}
+
+
+function apply_config(evt) {
+  set_config(config.value.ollama_url, config.value.model)
+  config.value.show = false
 }
 
 </script>

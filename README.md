@@ -32,7 +32,7 @@ The app uses the following fixed parameters (for now):
 
 ## TODO
 
-- [ ] configuration for model and url
+- [x] configuration for model and url
 - [ ] configuration for output size
 - [ ] favicon for the app
 - [ ] support response regeneration
