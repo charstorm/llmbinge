@@ -33,8 +33,8 @@ The app uses the following fixed parameters (for now):
 ## TODO
 
 - [x] configuration for model and url
-- [ ] configuration for output size
-- [ ] favicon for the app
+- [x] configuration for output size
+- [x] favicon for the app
 - [ ] support response regeneration
 - [ ] support save and reload
 - [ ] markdown rendering
