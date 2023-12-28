@@ -152,7 +152,7 @@ history related-people locations applications risk saftey
 similar-ideas similar-topics related-ideas related-topics
 side-effects materials current-practices process production
 discovery invention cause effect planning construction
-natural artificial
+natural artificial examples qualities quantities tests
 `)
 
 let config = ref({
@@ -261,7 +261,11 @@ async function create_node_fill_description(parent_id, title, query) {
 
 
 async function handle_user_query(evt) {
-  await create_node_fill_description(-1, "", user_query.value)
+  let query = user_query.value.trim()
+  if (query == "") {
+    return
+  }
+  await create_node_fill_description(-1, "", query)
   user_query.value = ""
 }
 
