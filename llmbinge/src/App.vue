@@ -38,6 +38,12 @@
                               label="model"
                               v-model="config.model" />
               </div>
+              <div class="mt-2 d-flex flex-wrap">
+                <v-text-field dense
+                              type="input"
+                              label="Prefix to be used for all queries to LLM"
+                              v-model="config.prefix" />
+              </div>
               <v-btn variant="outlined" class="mb-6" density="compact"
                      @click="apply_config">
                 Apply
@@ -118,8 +124,8 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
-import { 
+import { ref, computed, reactive, onMounted } from 'vue'
+import {
   llm_generate, get_related, llm_get_aspect_query, set_config
 } from "./ollama_client.js"
 
@@ -152,7 +158,18 @@ natural artificial
 let config = ref({
   show: false,
   ollama_url: "http://localhost:11434/api/generate",
-  model: "mistral"
+  model: "mistral",
+  prefix: "(Explain the following in 160 words or less, in simple informal English)"
+})
+
+// On loading, get config from local storage and set it
+onMounted(() => {
+  let config_str = window.localStorage.getItem("config")
+  if (config_str == null) {
+    return
+  }
+  let saved_config = JSON.parse(config_str)
+  config.value = { ...config.value, ...saved_config }
 })
 
 
@@ -206,6 +223,7 @@ async function create_node_fill_description(parent_id, title, query) {
   current_node.value = null
   loading.value = true
   let node = null
+  let prefix = config.value.prefix.trim()
   try {
     node = new_node(parent_id, title, query)
     current_node.value = node
@@ -213,7 +231,8 @@ async function create_node_fill_description(parent_id, title, query) {
     let raw_description = ""
     let text_count = 0
     // Handle the main response body
-    await llm_generate(query, (text) => {
+    let prefixed_query = `${prefix} ${query}`
+    await llm_generate(prefixed_query, (text) => {
       raw_description += text
       text = text.replace(/(?:\r\n|\r|\n)/g, '<br>')
       text_count++
@@ -354,6 +373,7 @@ async function handle_aspect(node, aspect) {
 function apply_config(evt) {
   set_config(config.value.ollama_url, config.value.model)
   config.value.show = false
+  window.localStorage.setItem("config", JSON.stringify(config.value))
 }
 
 </script>

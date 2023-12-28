@@ -37,5 +37,8 @@ The app uses the following fixed parameters (for now):
 - [ ] favicon for the app
 - [ ] support response regeneration
 - [ ] support save and reload
+- [ ] markdown rendering
+- [ ] equation rendering
+- [ ] graphviz graph rendering
 - [ ] detailed instructions on setting up the project
 - [ ] release 1.0
