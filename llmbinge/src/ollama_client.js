@@ -217,6 +217,7 @@ function choice(arr) {
 
 export function split_remove_minus(data) {
   return data.split(/\s+/)
+             .map(s => s.replace(/-/g, " "))
              .filter(s => s.trim() != "")
              .sort()
 }
@@ -229,42 +230,43 @@ history geography arts epics culture food industry
 economics humanities politics general-knowledge
 manufacturing travel psychology health research
 spirituality religion commerce physics chemistry
-`)
-
-const target_audiences = split_remove_minus(`
-kids adults professionals random experts beginners
-teachers students elders curious interested
+archeology forensic crime
 `)
 
 const specialities = split_remove_minus(`
 named-after-a-person old very-old recent
 surprising rare person place simple complex
-idea concept question
-standard accepted pseudo-science conspiracy
-well-known 
+idea concept question standard accepted 
+pseudo-science conspiracy well-known
+invention discovery theory conjecture funny
+mystery unexplained spooky
+`)
+
+const prefixes = split_remove_minus(`
+Fact: Idea: Topic: Title:
+Astonishing-fact:
+Random-fact:
+Question: 
 `)
 
 export async function generate_random_topic() {
-    const prefix = "topic:"
+    const prefix = choice(prefixes)
     const field = choice(fields_of_study)
-    const audience = choice(target_audiences)
     const speciality = choice(specialities)
     const prompt = `
-    Give a topic in or related to the field ${field}.
-    Make it diverse and very interesting.
-    Do not pick cliché topics.
-    Consider the speciality given when creating the topic.
+    Give a fact, idea, or topic in or related to the field ${field}.
+    It should have the following speciality: ${speciality}.
     Produce output exactly in the following format:
     --- start ---
-    field: ${field}
-    target-audience: ${audience}
-    speciality: ${speciality}
+    field: fill here
+    speciality: fill here
     ${prefix} fill (max 6 words)
     --- end ---
     Maximum 40 words.
     `
     let response = await llm_generate(prompt)
     let result = pick_line_with_prefix(response, prefix)
+    result = result.replace(/\.$/,"")
     return result
 }
 

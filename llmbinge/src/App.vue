@@ -60,7 +60,7 @@
                 <v-tooltip activator="parent" location="end">
                   Click to get a random topic
                 </v-tooltip>
-                <v-icon> mdi-lightbulb-on </v-icon>
+                <v-icon> mdi-star-shooting </v-icon>
               </v-btn>
             </div>
 
