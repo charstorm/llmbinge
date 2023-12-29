@@ -105,8 +105,8 @@ export async function get_related(query, response, inc_update) {
     Only produce 10 most relevant topics in the following output format.
     It should be a bullet list of topics. Each topic should be short.
     -- output format start --
-    * topic1 (just a name or a phrase)
-    * topic2 (just a name or a phrase)
+    * topic1 (just a name or a phrase, max 8 words)
+    * topic2 (just a name or a phrase, max 8 words)
     * so on
     -- output format end --
     `
@@ -158,6 +158,20 @@ export async function get_related(query, response, inc_update) {
 }
 
 
+function pick_line_with_prefix(response, prefix) {
+    let lines = response.split("\n")
+    let result = ""
+    let prefix_lower = prefix.toLowerCase()
+    for (let idx = 0; idx < lines.length; idx++) {
+        let line = lines[idx].trim()
+        if (line.toLowerCase().startsWith(prefix_lower)) {
+            result = line.slice(prefix.length).trim()
+        }
+    }
+    return result
+}
+
+
 // Create a new prompt based on the title and the aspect
 //
 // Part of the aspect feature. We have fixed set of aspects for every response.
@@ -191,15 +205,66 @@ export async function llm_get_aspect_query(title, aspect) {
     `.trim()
 
     let response = await llm_generate(aspect_query)
-    let lines = response.split("\n")
-    let result = ""
-    let prefix_lower = prefix.toLowerCase()
-    for (let idx = 0; idx < lines.length; idx++) {
-        let line = lines[idx].trim()
-        if (line.toLowerCase().startsWith(prefix_lower)) {
-            result = line.slice(prefix.length).trim()
-        }
-    }
+    let result = pick_line_with_prefix(response, prefix)
+    return result
+}
+
+function choice(arr) {
+    let index = Math.floor(Math.random() * arr.length)
+    return arr[index]
+}
+
+
+export function split_remove_minus(data) {
+  return data.split(/\s+/)
+             .filter(s => s.trim() != "")
+             .sort()
+}
+
+
+const fields_of_study = split_remove_minus(`
+science engineering medicine biology architecture
+electronics computer mathematics programming electrical
+history geography arts epics culture food industry
+economics humanities politics general-knowledge
+manufacturing travel psychology health research
+spirituality religion commerce physics chemistry
+`)
+
+const target_audiences = split_remove_minus(`
+kids adults professionals random experts beginners
+teachers students elders curious interested
+`)
+
+const specialities = split_remove_minus(`
+named-after-a-person old very-old recent
+surprising rare person place simple complex
+idea concept question
+standard accepted pseudo-science conspiracy
+well-known 
+`)
+
+export async function generate_random_topic() {
+    const prefix = "topic:"
+    const field = choice(fields_of_study)
+    const audience = choice(target_audiences)
+    const speciality = choice(specialities)
+    const prompt = `
+    Give a topic in or related to the field ${field}.
+    Make it diverse and very interesting.
+    Do not pick cliché topics.
+    Consider the speciality given when creating the topic.
+    Produce output exactly in the following format:
+    --- start ---
+    field: ${field}
+    target-audience: ${audience}
+    speciality: ${speciality}
+    ${prefix} fill (max 6 words)
+    --- end ---
+    Maximum 40 words.
+    `
+    let response = await llm_generate(prompt)
+    let result = pick_line_with_prefix(response, prefix)
     return result
 }
 

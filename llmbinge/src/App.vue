@@ -50,8 +50,19 @@
               </v-btn>
             </div>
 
-            <v-text-field label="Your Query" v-model="user_query"
-                          @keyup.enter="handle_user_query" />
+            <div class="d-flex flex-wrap">
+              <v-text-field style="max-width: 600px;"
+                            label="Your Query" v-model="user_query"
+                            @keyup.enter="handle_user_query" />
+              <v-btn icon class="mt-3 ml-2"
+                     density="compact"
+                     @click="handle_generate_random()">
+                <v-tooltip activator="parent" location="end">
+                  Click to get a random topic
+                </v-tooltip>
+                <v-icon> mdi-lightbulb-on </v-icon>
+              </v-btn>
+            </div>
 
             <div v-if="current_node">
 
@@ -126,14 +137,13 @@
 <script setup>
 import { ref, computed, reactive, onMounted } from 'vue'
 import {
-  llm_generate, get_related, llm_get_aspect_query, set_config
+  llm_generate,
+  get_related,
+  llm_get_aspect_query,
+  set_config,
+  generate_random_topic,
+  split_remove_minus
 } from "./ollama_client.js"
-
-function split_remove_minus(data) {
-  return data.split(/\s+/)
-             .filter(s => s.trim() != "")
-             .sort()
-}
 
 // Each response generated, along with its links will be considered as a "node"
 let node_counter = 0
@@ -340,6 +350,22 @@ function get_explored_as_list(node) {
   return result
 }
 
+
+async function wait_for_llm_result(promised) {
+  loading.value = true
+  let result = ""
+  try {
+    result = await promised
+  }
+  catch (e) {
+    console.error("ERROR:", e)
+    result = ""
+  }
+  loading.value = false
+  return result
+}
+
+
 // Handle the clicking of a given aspect
 //
 // This is a two step process.
@@ -350,20 +376,10 @@ async function handle_aspect(node, aspect) {
     return
   }
   current_node.value = null
-  loading.value = true
-  let query = ""
   let parent_title = get_title(node)
   // STEP 1: Generate a new query
-  try {
-    query = await llm_get_aspect_query(parent_title, aspect)
-  }
-  catch (e) {
-    console.log(`ERROR: ${e}`)
-    return
-  }
-  finally {
-    loading.value = false
-  }
+  let llm_response = llm_get_aspect_query(parent_title, aspect)
+  let query = await wait_for_llm_result(llm_response)
   if (query == "") {
     return
   }
@@ -378,6 +394,20 @@ function apply_config(evt) {
   set_config(config.value.ollama_url, config.value.model)
   config.value.show = false
   window.localStorage.setItem("config", JSON.stringify(config.value))
+}
+
+
+async function handle_generate_random() {
+  if (loading.value) {
+    return
+  }
+  current_node.value = null
+  let llm_response = generate_random_topic()
+  let query = await wait_for_llm_result(llm_response)
+  if (query == "") {
+    return
+  }
+  user_query.value = query
 }
 
 </script>

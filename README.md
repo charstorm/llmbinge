@@ -35,6 +35,7 @@ The app uses the following fixed parameters (for now):
 - [x] configuration for model and url
 - [x] configuration for output size
 - [x] favicon for the app
+- [x] generation of "random" topics
 - [ ] support response regeneration
 - [ ] support save and reload
 - [ ] markdown rendering
