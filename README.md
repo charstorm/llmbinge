@@ -26,10 +26,6 @@ yarn install
 yarn dev
 ```
 
-The app uses the following fixed parameters (for now):
-* ollama url = "http://localhost:11434/api/generate"
-* model = mistral
-
 ## TODO
 
 - [x] configuration for model and url

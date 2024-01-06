@@ -260,9 +260,9 @@ export async function generate_random_topic() {
     --- start ---
     field: fill here
     speciality: fill here
-    ${prefix} fill (max 6 words)
+    ${prefix} fill here
     --- end ---
-    Maximum 40 words.
+    Keep all the outputs and fills short, maximum 6 words.
     `
     let response = await llm_generate(prompt)
     let result = pick_line_with_prefix(response, prefix)
