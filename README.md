@@ -34,7 +34,7 @@ yarn dev
 - [x] generation of "random" topics
 - [ ] support response regeneration
 - [ ] support save and reload
-- [ ] markdown rendering
+- [ ] markdown code rendering
 - [ ] equation rendering
 - [ ] graphviz graph rendering
 - [ ] detailed instructions on setting up the project
