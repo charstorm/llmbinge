@@ -145,8 +145,6 @@ import {
   split_remove_minus
 } from "./ollama_client.js"
 
-// Each response generated, along with its links will be considered as a "node"
-let node_counter = 0
 // All the nodes generated so far
 // An id of the node is it's index in this list
 let node_list = ref([])
@@ -169,7 +167,7 @@ let config = ref({
   show: false,
   ollama_url: `/api/generate`,
   model: "mistral",
-  prefix: "(Explain the following in 160 words or less, in simple informal English)"
+  prefix: "(Respond in 160 words or less, in simple informal English)"
 })
 
 // On loading, get config from local storage and set it
@@ -192,8 +190,7 @@ onMounted(() => {
 //
 // query can be more complex than the title
 function new_node(parent_id=-1, title="", query="") {
-  let node_id = node_counter
-  node_counter++
+  let node_id = node_list.value.length
   let node = {
     parent_id: parent_id,
     node_id: node_id,

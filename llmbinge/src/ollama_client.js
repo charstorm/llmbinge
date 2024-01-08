@@ -258,17 +258,21 @@ archeology forensic crime
 const specialities = split_remove_minus(`
 named-after-a-person old very-old recent
 surprising rare person place simple complex
-idea concept question standard accepted
+idea concept standard accepted
 pseudo-science conspiracy well-known
 invention discovery theory conjecture funny
 mystery unexplained spooky
 `)
 
-const prefixes = split_remove_minus(`
-Fact: Idea: Topic: Title:
+let prefixes = split_remove_minus(`
+Idea: Topic: Question:
 Astonishing-fact:
+Counterintuitive-fact:
+Lesser-known-fact:
 Random-fact:
-Question:
+Jargon-of-the-day:
+Something-to-think:
+Funny-but-true:
 `)
 
 export async function generate_random_topic() {
@@ -287,6 +291,7 @@ export async function generate_random_topic() {
     Keep all the outputs and fills short, maximum 6 words.
     `
     let response = await llm_generate(prompt)
+    console.log(response)
     let result = pick_line_with_prefix(response, prefix)
     result = result.replace(/\.$/,"")
     return result
