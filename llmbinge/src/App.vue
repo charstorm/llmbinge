@@ -167,19 +167,21 @@ natural artificial examples qualities quantities tests
 
 let config = ref({
   show: false,
-  ollama_url: "http://localhost:11434/api/generate",
+  ollama_url: `/api/generate`,
   model: "mistral",
   prefix: "(Explain the following in 160 words or less, in simple informal English)"
 })
 
 // On loading, get config from local storage and set it
 onMounted(() => {
+  apply_config(null, true)
   let config_str = window.localStorage.getItem("config")
   if (config_str == null) {
     return
   }
   let saved_config = JSON.parse(config_str)
   config.value = { ...config.value, ...saved_config }
+  apply_config(null, true)
 })
 
 
@@ -390,8 +392,11 @@ async function handle_aspect(node, aspect) {
 }
 
 
-function apply_config(evt) {
+function apply_config(evt, startup=false) {
   set_config(config.value.ollama_url, config.value.model)
+  if (startup) {
+    return
+  }
   config.value.show = false
   window.localStorage.setItem("config", JSON.stringify(config.value))
 }
