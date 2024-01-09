@@ -282,11 +282,14 @@ export async function generate_random_topic() {
     const prompt = `
     Give a fact, idea, or topic in or related to the field ${field}.
     It should have the following speciality: ${speciality}.
-    Produce output exactly in the following format:
+    Produce output exactly in the following format
+    (without anything before or after):
     --- start ---
+
     field: fill here
     speciality: fill here
     ${prefix} fill here
+
     --- end ---
     Keep all the outputs and fills short, maximum 6 words.
     `

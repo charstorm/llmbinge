@@ -156,11 +156,12 @@ let user_query = ref("")
 let loading = ref(false)
 // A fixed set of aspects available for every node
 let aspects = split_remove_minus(`
-history related-people locations applications risk saftey
+history related-people locations applications risk safety
 similar-ideas similar-topics related-ideas related-topics
 side-effects materials current-practices process production
 discovery invention cause effect planning construction
 natural artificial examples qualities quantities tests
+solution mitigation reason management
 `)
 
 let config = ref({
