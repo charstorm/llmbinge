@@ -13,13 +13,12 @@ export function NewSessionForm() {
   const addToast = useUIStore((s) => s.addToast);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleStart = async (type: "article" | "map") => {
     const trimmed = topic.trim();
     if (!trimmed) return;
     try {
-      const { session, rootNode } = await createSession(trimmed, trimmed);
-      navigate(`/session/${session.id}/article/${rootNode.id}`);
+      const { session, rootNode } = await createSession(trimmed, trimmed, type);
+      navigate(`/session/${session.id}/${type}/${rootNode.id}`);
     } catch {
       addToast("Failed to create session", "error");
     }
@@ -38,7 +37,7 @@ export function NewSessionForm() {
   };
 
   return (
-    <form className="new-session-form" onSubmit={handleSubmit}>
+    <form className="new-session-form" onSubmit={(e) => { e.preventDefault(); handleStart("article"); }}>
       <input
         type="text"
         value={topic}
@@ -48,7 +47,10 @@ export function NewSessionForm() {
       />
       <div className="new-session-form__actions">
         <button type="submit" disabled={!topic.trim()}>
-          Start Exploring
+          Read Article
+        </button>
+        <button type="button" onClick={() => handleStart("map")} disabled={!topic.trim()}>
+          Explore Topics
         </button>
         <button type="button" onClick={handleRandom} disabled={loading}>
           {loading ? "Generating..." : "Random Topic"}

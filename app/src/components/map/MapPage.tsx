@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useMapGeneration } from "@/hooks/useMapGeneration";
+import { useNodeNavigation } from "@/hooks/useNodeNavigation";
 import { getAncestors } from "@/tree/selectors";
 import { MapCanvas } from "./MapCanvas";
 import { ErrorBanner } from "@/components/common/ErrorBanner";
@@ -24,6 +25,7 @@ export function MapPage() {
 
   const { loading, phase, layout, error, generate, abort, clearError } =
     useMapGeneration(nodeId ?? "");
+  const { createAndNavigate } = useNodeNavigation();
 
   // Parse existing layout from node content, or use freshly generated one
   const displayLayout = (() => {
@@ -100,6 +102,12 @@ export function MapPage() {
       <header className="article-header">
         <h1>{node.title}</h1>
         <div className="article-header__actions">
+          <button
+            onClick={() => createAndNavigate(node.id, node.title, "article")}
+            disabled={loading}
+          >
+            Read Article
+          </button>
           <button onClick={handleRegenerate} disabled={loading}>
             {loading ? `Generating (${phase})...` : "Regenerate"}
           </button>

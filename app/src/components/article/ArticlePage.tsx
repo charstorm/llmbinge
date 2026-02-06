@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router";
 import { useSessionStore } from "@/stores/sessionStore";
 import { useUIStore } from "@/stores/uiStore";
 import { useStreamingArticle } from "@/hooks/useStreamingArticle";
+import { useNodeNavigation } from "@/hooks/useNodeNavigation";
 import { getAncestors } from "@/tree/selectors";
 import { ArticleContent } from "./ArticleContent";
 import { RelatedTopics } from "./RelatedTopics";
@@ -25,6 +26,7 @@ export function ArticlePage() {
 
   const { streaming, content, error, generate, abort, clearError } =
     useStreamingArticle(nodeId ?? "");
+  const { createAndNavigate } = useNodeNavigation();
 
   // Auto-generate on mount if node has no content
   useEffect(() => {
@@ -96,6 +98,12 @@ export function ArticlePage() {
       <header className="article-header">
         <h1>{node.title}</h1>
         <div className="article-header__actions">
+          <button
+            onClick={() => createAndNavigate(node.id, node.title, "map")}
+            disabled={streaming}
+          >
+            Explore Topics
+          </button>
           <button onClick={handleRegenerate} disabled={streaming}>
             {streaming ? "Generating..." : "Regenerate"}
           </button>

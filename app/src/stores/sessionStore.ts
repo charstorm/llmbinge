@@ -21,6 +21,7 @@ interface SessionState {
   createSession: (
     title: string,
     rootNodeTitle: string,
+    rootNodeType?: "article" | "map",
   ) => Promise<{ session: Session; rootNode: TreeNode }>;
   deleteSession: (sessionId: string) => Promise<void>;
 
@@ -76,10 +77,10 @@ export const useSessionStore = create<SessionState>()((set, get) => ({
     });
   },
 
-  createSession: async (title: string, rootNodeTitle: string) => {
+  createSession: async (title: string, rootNodeTitle: string, rootNodeType: "article" | "map" = "article") => {
     const sessionId = generateId();
     const rootNode = createNode({
-      type: "article",
+      type: rootNodeType,
       parentId: null,
       sessionId,
       title: rootNodeTitle,

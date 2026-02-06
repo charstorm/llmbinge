@@ -34,6 +34,9 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
     const el = containerRef.current;
     if (!el) return;
     el.addEventListener("mouseup", handleMouseUp);
-    return () => el.removeEventListener("mouseup", handleMouseUp);
-  }, [containerRef, handleMouseUp]);
+    return () => {
+      el.removeEventListener("mouseup", handleMouseUp);
+      setSelectedText(null);
+    };
+  }, [containerRef, handleMouseUp, setSelectedText]);
 }
