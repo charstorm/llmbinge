@@ -14,9 +14,14 @@ export function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar__header">
-        <Link to="/" className="sidebar__back">
-          &larr; Home
-        </Link>
+        <div className="sidebar__nav">
+          <Link to="/" className="sidebar__back">
+            &larr; Home
+          </Link>
+          <Link to="/config" className="sidebar__config">
+            Settings
+          </Link>
+        </div>
         <h2 className="sidebar__title">{session?.title ?? "Session"}</h2>
       </div>
       <nav className="sidebar__tree">

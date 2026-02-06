@@ -37,6 +37,8 @@ interface SessionState {
   persistSession: (sessionId: string) => Promise<void>;
 }
 
+let _sessionVersion = 0;
+
 export const useSessionStore = create<SessionState>()((set, get) => ({
   sessions: [],
   currentSessionId: null,
@@ -44,12 +46,15 @@ export const useSessionStore = create<SessionState>()((set, get) => ({
   loading: false,
 
   loadSessions: async () => {
+    const version = ++_sessionVersion;
     const sessions = await storage.getSessions();
+    if (version !== _sessionVersion) return; // stale — a delete happened since we started
     sessions.sort((a, b) => b.updatedAt - a.updatedAt);
     set({ sessions });
   },
 
   loadSession: async (sessionId: string) => {
+    const version = _sessionVersion;
     set({ loading: true, currentSessionId: sessionId });
     const [session, nodeList] = await Promise.all([
       storage.getSession(sessionId),
@@ -59,8 +64,11 @@ export const useSessionStore = create<SessionState>()((set, get) => ({
     for (const node of nodeList) {
       nodes.set(node.id, node);
     }
-    // Ensure the session is in the sessions list (needed for direct URL navigation)
     set((state) => {
+      // Don't touch sessions list if a delete happened since we started
+      if (version !== _sessionVersion) {
+        return { nodes, loading: false };
+      }
       const hasSession = state.sessions.some((s) => s.id === sessionId);
       const sessions =
         !hasSession && session ? [...state.sessions, session] : state.sessions;
@@ -104,6 +112,7 @@ export const useSessionStore = create<SessionState>()((set, get) => ({
   },
 
   deleteSession: async (sessionId: string) => {
+    ++_sessionVersion; // invalidate any in-flight loadSessions/loadSession
     const nodesToDelete = await storage.getNodesForSession(sessionId);
     await storage.deleteNodes(nodesToDelete.map((n) => n.id));
     await storage.deleteSession(sessionId);

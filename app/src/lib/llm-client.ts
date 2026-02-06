@@ -26,6 +26,11 @@ export async function streamChatCompletion(
   callbacks: StreamCallbacks,
   signal?: AbortSignal,
 ): Promise<void> {
+  const tag = `[llm] ${config.model}`;
+  const systemSnippet = messages.find((m) => m.role === "system")?.content.slice(0, 120) ?? "";
+  console.log(`${tag} ← request (${messages.length} msgs) ${systemSnippet}…`);
+  const startTime = performance.now();
+
   const url = `${config.endpoint}/chat/completions`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -50,6 +55,11 @@ export async function streamChatCompletion(
       signal,
     });
   } catch (err) {
+    if (signal?.aborted) {
+      console.log(`${tag} ✕ aborted before response`);
+      return;
+    }
+    console.error(`${tag} ✕ network error:`, err);
     callbacks.onError(
       err instanceof Error ? err : new LLMError("Network request failed"),
     );
@@ -63,6 +73,7 @@ export async function streamChatCompletion(
     } catch {
       // ignore
     }
+    console.error(`${tag} ✕ HTTP ${response.status}: ${body.slice(0, 200)}`);
     callbacks.onError(
       new LLMError(
         `LLM API error ${response.status}: ${body}`,
@@ -132,11 +143,16 @@ export async function streamChatCompletion(
       }
     }
 
+    const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+    console.log(`${tag} → complete (${accumulated.length} chars, ${elapsed}s)`);
     callbacks.onComplete(accumulated);
   } catch (err) {
+    const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
     if (signal?.aborted) {
-      callbacks.onError(new StreamError("Stream aborted", accumulated));
+      console.log(`${tag} ✕ aborted (${elapsed}s, ${accumulated.length} chars partial)`);
+      return;
     } else {
+      console.error(`${tag} ✕ error (${elapsed}s):`, err);
       callbacks.onError(
         err instanceof Error
           ? new StreamError(err.message, accumulated)

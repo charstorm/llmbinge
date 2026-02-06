@@ -5,26 +5,29 @@ export function useTextSelection(containerRef: React.RefObject<HTMLElement | nul
   const setSelectedText = useUIStore((s) => s.setSelectedText);
 
   const handleMouseUp = useCallback(() => {
-    const selection = window.getSelection();
-    if (!selection || selection.isCollapsed) {
-      setSelectedText(null);
-      return;
-    }
+    // Defer so the browser finalises the selection after mouseup
+    requestAnimationFrame(() => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed) {
+        setSelectedText(null);
+        return;
+      }
 
-    const text = selection.toString().trim();
-    if (!text) {
-      setSelectedText(null);
-      return;
-    }
+      const text = selection.toString().trim();
+      if (!text) {
+        setSelectedText(null);
+        return;
+      }
 
-    // Only capture selections within our container
-    if (
-      containerRef.current &&
-      selection.anchorNode &&
-      containerRef.current.contains(selection.anchorNode)
-    ) {
-      setSelectedText(text);
-    }
+      // Only capture selections within our container
+      if (
+        containerRef.current &&
+        selection.anchorNode &&
+        containerRef.current.contains(selection.anchorNode)
+      ) {
+        setSelectedText(text);
+      }
+    });
   }, [containerRef, setSelectedText]);
 
   useEffect(() => {

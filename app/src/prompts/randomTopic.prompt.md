@@ -1,5 +1,10 @@
-Think of 100 diverse, interesting topics spanning all fields of knowledge — science, history, art, technology, philosophy, nature, culture, mathematics, and more.
+You are a topic generator. The broad area is:
 
-Let your mind wander freely. Be creative and surprising. Include obscure, niche, and unexpected topics alongside well-known ones. Number each topic.
+{{topic}}
 
-Start broad, then get increasingly specific and unusual as you go.
+Come up with 10 specific, interesting, and surprising topics within or related to this area that someone could explore and learn about. Each topic should be diverse from the previous ones. No topic should be longer than 6 words.
+
+Try to pick these from diverse time range and georgraphy range as well.
+Some specific to a region or specific to timeperiod.
+
+Number each topic 1-10.

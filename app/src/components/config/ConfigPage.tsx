@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { Link } from "react-router";
 import { useConfigStore } from "@/stores/configStore";
 import { useUIStore } from "@/stores/uiStore";
 import { ConfigField } from "./ConfigField";
@@ -21,7 +21,6 @@ export function ConfigPage() {
   const updateAspects = useConfigStore((s) => s.updateAspects);
   const updateTopics = useConfigStore((s) => s.updateTopics);
   const addToast = useUIStore((s) => s.addToast);
-  const navigate = useNavigate();
 
   const [endpoint, setEndpoint] = useState("");
   const [model, setModel] = useState("");
@@ -134,9 +133,7 @@ export function ConfigPage() {
     <div className="config-page">
       <div className="config-page__header">
         <h1>Configuration</h1>
-        <button type="button" onClick={() => navigate("/")}>
-          Back to Home
-        </button>
+        <Link to="/" className="config-page__home-link">&larr; Home</Link>
       </div>
 
       <form onSubmit={handleSave}>

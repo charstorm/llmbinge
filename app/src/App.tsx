@@ -1,5 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router";
-import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router";
+import { useEffect, useRef } from "react";
 import { HomePage } from "@/components/home/HomePage";
 import { SessionLayout } from "@/components/layout/SessionLayout";
 import { ArticlePage } from "@/components/article/ArticlePage";
@@ -13,6 +13,16 @@ import { DevStorage } from "@/pages/dev/DevStorage";
 import { DevTree } from "@/pages/dev/DevTree";
 import { useConfigStore } from "@/stores/configStore";
 
+function RouteLogger() {
+  const location = useLocation();
+  const prevPath = useRef(location.pathname);
+  useEffect(() => {
+    console.log(`[nav] ${prevPath.current} → ${location.pathname}`);
+    prevPath.current = location.pathname;
+  }, [location.pathname]);
+  return null;
+}
+
 export function App() {
   const loadConfig = useConfigStore((s) => s.loadConfig);
   const loaded = useConfigStore((s) => s.loaded);
@@ -23,6 +33,7 @@ export function App() {
 
   return (
     <BrowserRouter>
+      <RouteLogger />
       <ToastContainer />
       <ConfirmBanner />
       <Routes>

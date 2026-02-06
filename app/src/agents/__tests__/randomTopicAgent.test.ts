@@ -16,34 +16,30 @@ beforeEach(() => {
 });
 
 describe("generateRandomTopic", () => {
-  it("extracts a topic from CoT output", async () => {
-    const cotOutput = Array.from(
-      { length: 30 },
-      (_, i) => `${i + 1}. Topic ${i + 1}`,
-    ).join("\n");
+  it("extracts a topic from a 10-item list", async () => {
+    const output = Array.from({ length: 10 }, (_, i) => `${i + 1}. Topic ${i + 1}`).join("\n");
 
-    vi.spyOn(llmClient, "completeChatCompletion").mockResolvedValueOnce(
-      cotOutput,
-    );
+    vi.spyOn(llmClient, "completeChatCompletion").mockResolvedValueOnce(output);
 
     const result = await generateRandomTopic(config);
-    expect(result.topic).toMatch(/^Topic \d+$/);
-    // Should pick from the last 20
-    const num = parseInt(result.topic.split(" ")[1]!);
-    expect(num).toBeGreaterThanOrEqual(11);
+    // should pick from the last 3 (Topic 8, 9, or 10)
+    expect(result.topic).toMatch(/^Topic (8|9|10)$/);
+    expect(result.raw).toBe(output);
   });
 
-  it("uses high temperature", async () => {
-    let capturedConfig: LLMConfig | null = null;
+  it("sends a single broad topic in the prompt", async () => {
+    let capturedMessages: llmClient.ChatMessage[] = [];
     vi.spyOn(llmClient, "completeChatCompletion").mockImplementation(
-      async (cfg) => {
-        capturedConfig = cfg;
-        return "1. Fallback topic";
+      async (_cfg, msgs) => {
+        capturedMessages = msgs;
+        return "1. Some topic";
       },
     );
 
     await generateRandomTopic(config);
-    expect(capturedConfig!.temperature).toBe(1.2);
+    const prompt = capturedMessages[0]!.content;
+    expect(prompt).toContain("The broad area is:");
+    expect(prompt).toContain("diverse from the previous");
   });
 
   it("falls back when no topics extracted", async () => {

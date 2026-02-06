@@ -29,14 +29,18 @@
 }
 
 html,
-body,
-#root {
+body {
   height: 100%;
+  overflow: hidden;
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-sans);
   font-size: 15px;
   line-height: 1.6;
+}
+#root {
+  height: 100%;
+  overflow-y: auto;
 }
 
 a {
@@ -555,15 +559,23 @@ select:focus {
   padding: 8px 0;
 }
 
-/* Explore Selection Button */
+/* Explore Selection Button — floating bar */
 .article-explore-selection {
-  margin-bottom: 16px;
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
 }
 .article-explore-selection button {
   background: var(--accent);
   border-color: var(--accent);
   color: white;
   font-size: 13px;
+  padding: 8px 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
 }
 .article-explore-selection button:hover {
   background: var(--accent-hover);

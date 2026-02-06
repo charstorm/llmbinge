@@ -60,6 +60,9 @@ export function useStreamingArticle(nodeId: string) {
               persistNode(nodeId);
             },
             onError: (err) => {
+              // Ignore errors from intentional aborts (navigation, regeneration)
+              if (controller.signal.aborted) return;
+
               const partial =
                 err instanceof StreamError ? (err.partialContent ?? "") : "";
               setState((prev) => ({
