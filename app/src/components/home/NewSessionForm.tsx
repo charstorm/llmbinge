@@ -17,8 +17,12 @@ export function NewSessionForm() {
     e.preventDefault();
     const trimmed = topic.trim();
     if (!trimmed) return;
-    const { session, rootNode } = await createSession(trimmed, trimmed);
-    navigate(`/session/${session.id}/article/${rootNode.id}`);
+    try {
+      const { session, rootNode } = await createSession(trimmed, trimmed);
+      navigate(`/session/${session.id}/article/${rootNode.id}`);
+    } catch {
+      addToast("Failed to create session", "error");
+    }
   };
 
   const handleRandom = async () => {

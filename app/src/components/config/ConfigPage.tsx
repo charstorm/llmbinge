@@ -85,28 +85,32 @@ export function ConfigPage() {
     const tokens = parseInt(maxTokens, 10);
     const tp = parseFloat(topP);
 
-    await updateLLMConfig({
-      endpoint: endpoint.trim(),
-      model: model.trim(),
-      temperature: temp,
-      maxTokens: tokens,
-      topP: tp,
-      ...(apiKey.trim() ? { apiKey: apiKey.trim() } : {}),
-    });
+    try {
+      await updateLLMConfig({
+        endpoint: endpoint.trim(),
+        model: model.trim(),
+        temperature: temp,
+        maxTokens: tokens,
+        topP: tp,
+        ...(apiKey.trim() ? { apiKey: apiKey.trim() } : {}),
+      });
 
-    const aspects = aspectsText
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    await updateAspects(aspects);
+      const aspects = aspectsText
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      await updateAspects(aspects);
 
-    const topics = topicsText
-      .split("\n")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    await updateTopics(topics);
+      const topics = topicsText
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      await updateTopics(topics);
 
-    addToast("Configuration saved", "success");
+      addToast("Configuration saved", "success");
+    } catch {
+      addToast("Failed to save configuration", "error");
+    }
   };
 
   const handleReset = () => {

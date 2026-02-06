@@ -6,6 +6,7 @@ export function SessionList() {
   const sessions = useSessionStore((s) => s.sessions);
   const deleteSession = useSessionStore((s) => s.deleteSession);
   const showConfirm = useUIStore((s) => s.showConfirm);
+  const addToast = useUIStore((s) => s.addToast);
 
   if (sessions.length === 0) {
     return (
@@ -20,9 +21,13 @@ export function SessionList() {
   ) => {
     e.preventDefault();
     e.stopPropagation();
-    showConfirm(`Delete session "${title}" and all its data?`, () =>
-      deleteSession(sessionId),
-    );
+    showConfirm(`Delete session "${title}" and all its data?`, async () => {
+      try {
+        await deleteSession(sessionId);
+      } catch {
+        addToast("Failed to delete session", "error");
+      }
+    });
   };
 
   return (

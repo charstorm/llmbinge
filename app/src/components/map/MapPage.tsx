@@ -19,6 +19,7 @@ export function MapPage() {
   const nodes = useSessionStore((s) => s.nodes);
   const deleteNode = useSessionStore((s) => s.deleteNode);
   const showConfirm = useUIStore((s) => s.showConfirm);
+  const addToast = useUIStore((s) => s.addToast);
   const node = nodeId ? nodes.get(nodeId) : undefined;
 
   const { loading, phase, layout, error, generate, abort, clearError } =
@@ -51,15 +52,19 @@ export function MapPage() {
   const handleDelete = useCallback(() => {
     if (!node || !sessionId) return;
     showConfirm(`Delete "${node.title}" and all its children?`, async () => {
-      const parentId = node.parentId;
-      await deleteNode(node.id);
-      if (parentId) {
-        navigate(`/session/${sessionId}/article/${parentId}`);
-      } else {
-        navigate("/");
+      try {
+        const parentId = node.parentId;
+        await deleteNode(node.id);
+        if (parentId) {
+          navigate(`/session/${sessionId}/article/${parentId}`);
+        } else {
+          navigate("/");
+        }
+      } catch {
+        addToast("Failed to delete node", "error");
       }
     });
-  }, [node, sessionId, showConfirm, deleteNode, navigate]);
+  }, [node, sessionId, showConfirm, deleteNode, navigate, addToast]);
 
   if (!node) {
     return (

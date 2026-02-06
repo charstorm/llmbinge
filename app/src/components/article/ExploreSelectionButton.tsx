@@ -14,6 +14,7 @@ export function ExploreSelectionButton({
 }: ExploreSelectionButtonProps) {
   const selectedText = useUIStore((s) => s.selectedText);
   const setSelectedText = useUIStore((s) => s.setSelectedText);
+  const addToast = useUIStore((s) => s.addToast);
   const { createAndNavigate } = useNodeNavigation();
 
   if (disabled || !selectedText) return null;
@@ -22,10 +23,14 @@ export function ExploreSelectionButton({
     const text = selectedText;
     setSelectedText(null);
     window.getSelection()?.removeAllRanges();
-    await createAndNavigate(nodeId, text, "article", {
-      sourceTopic: topic,
-      selectedText: text,
-    });
+    try {
+      await createAndNavigate(nodeId, text, "article", {
+        sourceTopic: topic,
+        selectedText: text,
+      });
+    } catch {
+      addToast("Failed to explore selection", "error");
+    }
   };
 
   return (
