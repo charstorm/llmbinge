@@ -34,11 +34,6 @@ export const useUIStore = create<UIState>()((set) => ({
     set((state) => ({
       toasts: [...state.toasts, { id, message, type }],
     }));
-    setTimeout(() => {
-      set((state) => ({
-        toasts: state.toasts.filter((t) => t.id !== id),
-      }));
-    }, 5000);
   },
 
   dismissToast: (id) => {

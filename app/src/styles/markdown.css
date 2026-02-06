@@ -1,0 +1,207 @@
+/* Markdown content container */
+.markdown-content {
+  color: var(--text-primary);
+  line-height: 1.75;
+  font-size: 15px;
+}
+
+.markdown-content > *:first-child {
+  margin-top: 0;
+}
+
+/* Headings */
+.markdown-content h1 {
+  font-size: 1.8rem;
+  margin: 1.5em 0 0.6em;
+  font-weight: 700;
+  line-height: 1.3;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3em;
+}
+.markdown-content h2 {
+  font-size: 1.4rem;
+  margin: 1.4em 0 0.5em;
+  font-weight: 600;
+  line-height: 1.3;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.25em;
+}
+.markdown-content h3 {
+  font-size: 1.15rem;
+  margin: 1.3em 0 0.4em;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+  font-size: 1rem;
+  margin: 1.2em 0 0.4em;
+  font-weight: 600;
+}
+
+/* Paragraphs */
+.markdown-content p {
+  margin: 0.8em 0;
+}
+
+/* Links */
+.markdown-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.markdown-content a:hover {
+  color: var(--accent-hover);
+}
+
+/* Bold & Italic */
+.markdown-content strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.markdown-content em {
+  font-style: italic;
+}
+
+/* Lists */
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0.8em 0;
+  padding-left: 1.8em;
+}
+.markdown-content li {
+  margin: 0.3em 0;
+}
+.markdown-content li > p {
+  margin: 0.3em 0;
+}
+.markdown-content ul {
+  list-style-type: disc;
+}
+.markdown-content ol {
+  list-style-type: decimal;
+}
+
+/* Blockquotes */
+.markdown-content blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  border-left: 3px solid var(--accent);
+  background: var(--bg-secondary);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--text-secondary);
+}
+.markdown-content blockquote p {
+  margin: 0.3em 0;
+}
+
+/* Inline code */
+.markdown-content code:not(pre code) {
+  background: var(--bg-surface);
+  padding: 0.15em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+}
+
+/* Code blocks */
+.markdown-content pre {
+  margin: 1em 0;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.markdown-content pre code {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+}
+
+/* Tables */
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 14px;
+}
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+}
+.markdown-content th {
+  background: var(--bg-surface);
+  font-weight: 600;
+}
+.markdown-content tr:nth-child(even) {
+  background: var(--bg-secondary);
+}
+
+/* Horizontal rule */
+.markdown-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5em 0;
+}
+
+/* Images */
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  margin: 1em 0;
+}
+
+/* KaTeX overrides for dark theme */
+.markdown-content .katex {
+  color: var(--text-primary);
+  font-size: 1.05em;
+}
+.markdown-content .katex-display {
+  margin: 1em 0;
+  overflow-x: auto;
+  padding: 8px 0;
+}
+
+/* highlight.js theme overrides for dark */
+.markdown-content .hljs {
+  background: transparent;
+  color: var(--text-primary);
+}
+.markdown-content .hljs-keyword,
+.markdown-content .hljs-selector-tag {
+  color: #c678dd;
+}
+.markdown-content .hljs-string,
+.markdown-content .hljs-attr {
+  color: #98c379;
+}
+.markdown-content .hljs-number,
+.markdown-content .hljs-literal {
+  color: #d19a66;
+}
+.markdown-content .hljs-comment {
+  color: #5c6370;
+  font-style: italic;
+}
+.markdown-content .hljs-built_in,
+.markdown-content .hljs-type {
+  color: #e6c07b;
+}
+.markdown-content .hljs-function .hljs-title,
+.markdown-content .hljs-title {
+  color: #61afef;
+}
+.markdown-content .hljs-params {
+  color: var(--text-primary);
+}
+.markdown-content .hljs-meta {
+  color: #56b6c2;
+}

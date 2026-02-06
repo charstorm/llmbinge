@@ -51,12 +51,21 @@ export const useSessionStore = create<SessionState>()((set, get) => ({
 
   loadSession: async (sessionId: string) => {
     set({ loading: true, currentSessionId: sessionId });
-    const nodeList = await storage.getNodesForSession(sessionId);
+    const [session, nodeList] = await Promise.all([
+      storage.getSession(sessionId),
+      storage.getNodesForSession(sessionId),
+    ]);
     const nodes = new Map<string, TreeNode>();
     for (const node of nodeList) {
       nodes.set(node.id, node);
     }
-    set({ nodes, loading: false });
+    // Ensure the session is in the sessions list (needed for direct URL navigation)
+    set((state) => {
+      const hasSession = state.sessions.some((s) => s.id === sessionId);
+      const sessions =
+        !hasSession && session ? [...state.sessions, session] : state.sessions;
+      return { nodes, loading: false, sessions };
+    });
   },
 
   createSession: async (title: string, rootNodeTitle: string) => {
@@ -118,21 +127,22 @@ export const useSessionStore = create<SessionState>()((set, get) => ({
       if (parent) await storage.saveNode(parent);
     }
 
-    if (!node.parentId) {
-      const session = get().sessions.find((s) => s.id === node.sessionId);
-      if (session) {
-        const updated = {
-          ...session,
-          rootNodeIds: [...session.rootNodeIds, node.id],
-          updatedAt: Date.now(),
-        };
-        await storage.saveSession(updated);
-        set((state) => ({
-          sessions: state.sessions.map((s) =>
-            s.id === updated.id ? updated : s,
-          ),
-        }));
-      }
+    // Always update session updatedAt; also add rootNodeId if this is a root node
+    const session = get().sessions.find((s) => s.id === node.sessionId);
+    if (session) {
+      const updated = {
+        ...session,
+        rootNodeIds: !node.parentId
+          ? [...session.rootNodeIds, node.id]
+          : session.rootNodeIds,
+        updatedAt: Date.now(),
+      };
+      await storage.saveSession(updated);
+      set((state) => ({
+        sessions: state.sessions.map((s) =>
+          s.id === updated.id ? updated : s,
+        ),
+      }));
     }
 
     return node;
@@ -155,21 +165,22 @@ export const useSessionStore = create<SessionState>()((set, get) => ({
       if (parent) await storage.saveNode(parent);
     }
 
-    if (!node.parentId) {
-      const session = get().sessions.find((s) => s.id === node.sessionId);
-      if (session) {
-        const updated = {
-          ...session,
-          rootNodeIds: session.rootNodeIds.filter((id) => id !== nodeId),
-          updatedAt: Date.now(),
-        };
-        await storage.saveSession(updated);
-        set((state) => ({
-          sessions: state.sessions.map((s) =>
-            s.id === updated.id ? updated : s,
-          ),
-        }));
-      }
+    // Always update session updatedAt; also remove rootNodeId if this was a root node
+    const session = get().sessions.find((s) => s.id === node.sessionId);
+    if (session) {
+      const updated = {
+        ...session,
+        rootNodeIds: !node.parentId
+          ? session.rootNodeIds.filter((id) => id !== nodeId)
+          : session.rootNodeIds,
+        updatedAt: Date.now(),
+      };
+      await storage.saveSession(updated);
+      set((state) => ({
+        sessions: state.sessions.map((s) =>
+          s.id === updated.id ? updated : s,
+        ),
+      }));
     }
 
     return removedIds;
